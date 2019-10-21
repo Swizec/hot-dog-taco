@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "scope": "swizec",
+    "name": "hotdogtaco",
+    "routes": [{
+        "src": "^/(.*).html",
+        "headers": {
+            "cache-control": "public,max-age=0,must-revalidate"
+        },
+        "dest": "$1.html"
+    }],
+    "builds": [{
+        "src": "package.json",
+        "use": "@now/static-build",
+        "config": {
+            "distDir": "public"
+        }
+    }]
+}

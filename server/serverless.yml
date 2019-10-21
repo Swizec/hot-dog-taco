@@ -1,0 +1,49 @@
+service: hot-dog-taco
+
+provider:
+    name: aws
+    runtime: nodejs10.x
+    stage: dev
+
+    environment:
+        VOTES_TABLE: ${self:service}-votes-${self:provider.stage}
+
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.VOTES_TABLE}"
+
+functions:
+    graphql:
+        handler: dist/handler.graphql
+        events:
+            - http:
+                  path: graphql
+                  method: GET
+                  cors: true
+            - http:
+                  path: graphql
+                  method: POST
+                  cors: true
+
+resources:
+    Resources:
+        VotesTable:
+            Type: "AWS::DynamoDB::Table"
+            Properties:
+                AttributeDefinitions:
+                    - AttributeName: voteId
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: voteId
+                      KeyType: HASH
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                TableName: ${self:provider.environment.VOTES_TABLE}
